@@ -1,0 +1,1 @@
+export function Footer() { return <footer><strong>MOVIES<span>&</span>ENT</strong><p>Discover your next favourite movie, series or anime.</p><small>© {new Date().getFullYear()} Movies & Entertainment</small></footer>; }
