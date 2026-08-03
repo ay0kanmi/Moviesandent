@@ -1,0 +1,7 @@
+import type { Movie } from "./movies";
+const image = (path: string | null, size = "w500") => path ? `https://image.tmdb.org/t/p/${size}${path}` : "https://placehold.co/500x750/162033/f8fafc?text=Movies%26Ent";
+type TmdbMovie = { id: number; title: string; release_date?: string; vote_average: number; overview: string; poster_path: string | null; backdrop_path: string | null };
+async function request<T>(path: string): Promise<T> { const token = process.env.TMDB_API_TOKEN; if (!token) throw new Error("TMDB_API_TOKEN is not configured"); const response = await fetch(`https://api.themoviedb.org/3${path}`, { headers: { Authorization: `Bearer ${token}` }, next: { revalidate: 3600 } }); if (!response.ok) throw new Error(`TMDb request failed (${response.status})`); return response.json() as Promise<T>; }
+const mapMovie = (movie: TmdbMovie): Movie => ({ slug: String(movie.id), title: movie.title, year: Number(movie.release_date?.slice(0, 4)) || new Date().getFullYear(), rating: Number(movie.vote_average.toFixed(1)), runtime: "Movie", genres: [], overview: movie.overview, poster: image(movie.poster_path), backdrop: image(movie.backdrop_path, "original"), telegramUrl: "https://t.me/moviesandent" });
+export async function getTrendingMovies() { const data = await request<{ results: TmdbMovie[] }>("/trending/movie/week"); return data.results.slice(0, 12).map(mapMovie); }
+export async function getTmdbMovie(id: string) { return mapMovie(await request<TmdbMovie>(`/movie/${id}`)); }
