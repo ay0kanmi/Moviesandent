@@ -1,0 +1,5 @@
+create table if not exists public.collections (id bigint generated always as identity primary key, slug text unique not null, name text not null, description text, created_at timestamptz not null default now());
+create table if not exists public.collection_movies (collection_id bigint not null references public.collections(id) on delete cascade, tmdb_id integer not null, position integer not null default 0, primary key (collection_id, tmdb_id));
+create table if not exists public.telegram_links (id bigint generated always as identity primary key, tmdb_id integer not null, label text not null, url text not null check (url like 'https://t.me/%'), created_at timestamptz not null default now(), unique (tmdb_id, label));
+alter table public.collections enable row level security; alter table public.collection_movies enable row level security; alter table public.telegram_links enable row level security;
+create policy "read collections" on public.collections for select using (true); create policy "read collection movies" on public.collection_movies for select using (true); create policy "read telegram links" on public.telegram_links for select using (true);
